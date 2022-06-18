@@ -1,6 +1,8 @@
 
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
+#include <device_functions.h>
+#include <cuda.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -35,10 +37,14 @@ _global__ void imageCutter (int* fotoOriginal, int* fotoNueva, int posFotoNueva,
 
 
 // acercamiento mas simple (y menos optimizado)
-_global__ void crossCorrelation (int* foto1, int* foto2, int pixelCount, int Iteracion, int minX, int maxX, int minY, int maxY){
+_global__ void crossCorrelation (int* foto1, int* foto2, int pixelCount, int fotoSize, int Iteracion, int minX, int difX, int minY, int difY, int posXFoto2, int posYFoto2){
     int tid = threadIdx.x + blockIdx.x * blockDim.x;
+    extern  __shared__ int sharedMemory[];
+    int* f1 = sharedMemory;
+    int* f2 = sharedMemory[pixelCount];
 
-    
+    f1[tid] = foto1[(minX + tid / difY) * fotoSize + (minY + tid % difY)];
+    f2[tid] = foto2[(minX + tid / difY - posXFoto2) * fotoSize + (minY + tid % difY - posYFoto2)];
 
 
 
